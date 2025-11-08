@@ -14,7 +14,7 @@
 </head>
 <body>
   <header class="app-header">
-    <div>
+    <div class="header-copy">
       <h1>Ecosistema Evolutivo de Conway</h1>
       <p>
         Experimenta una variante del Juego de la Vida inspirada en Spore: las células
@@ -27,65 +27,161 @@
       <span id="popLabel">Población: <strong id="pop">0</strong></span>
       <span id="envLabel">Energía media: <strong id="env">0.00</strong></span>
     </div>
+    <nav class="view-switcher" aria-label="Cambiar vista">
+      <button type="button" class="view-btn active" data-view="sim">Simulación</button>
+      <button type="button" class="view-btn" data-view="cd">CD</button>
+    </nav>
   </header>
 
-  <main class="app-main">
-    <section class="canvas-panel">
-      <div class="canvas-wrap" id="canvasWrap" aria-label="Tablero">
-        <canvas id="board" width="960" height="720"></canvas>
+  <main class="app-pages">
+    <section id="simulationPage" class="page page-sim active" aria-labelledby="simHeading">
+      <div class="app-main">
+        <section class="canvas-panel">
+          <h2 id="simHeading" class="visually-hidden">Panel de simulación</h2>
+          <div class="canvas-wrap" id="canvasWrap" aria-label="Tablero">
+            <canvas id="board" width="960" height="720"></canvas>
+          </div>
+          <p class="hint">Arrastra para sembrar células. Click derecho o Ctrl para limpiar.</p>
+        </section>
+
+        <aside class="control-panel">
+          <section class="panel">
+            <h2>Simulación</h2>
+            <div class="row">
+              <button id="playPause" class="btn primary">▶️ Reproducir</button>
+              <button id="step" class="btn">⏩ Paso</button>
+              <button id="clear" class="btn">🧹 Limpiar</button>
+            </div>
+            <div class="row">
+              <button id="randomize" class="btn">✨ Llenar aleatorio</button>
+              <button id="randomEnv" class="btn">🌱 Nuevo entorno</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Ritmo y visión</h2>
+            <label class="ctl">
+              Velocidad
+              <input id="speed" type="range" min="1" max="60" value="12" />
+              <small><span id="fpsLabel">12</span> FPS</small>
+            </label>
+            <label class="ctl">
+              Zoom
+              <input id="zoom" type="range" min="8" max="32" value="18" />
+              <small><span id="zoomLabel">18</span> px</small>
+            </label>
+            <label class="ctl chk">
+              <input id="showGrid" type="checkbox" checked />
+              Mostrar cuadrícula
+            </label>
+            <label class="ctl chk">
+              <input id="showEnvironment" type="checkbox" checked />
+              Mostrar energía ambiental
+            </label>
+          </section>
+
+          <section class="panel">
+            <h2>Evolución</h2>
+            <fieldset id="stageSelector" class="stage-selector">
+              <legend>Nivel de célula a pintar</legend>
+              <label><input type="radio" name="stage" value="1" checked /> Brote (I)</label>
+              <label><input type="radio" name="stage" value="2" /> Colonia (II)</label>
+              <label><input type="radio" name="stage" value="3" /> Núcleo (III)</label>
+            </fieldset>
+            <p class="description">
+              Las células siguen la regla B3/S23, pero su nivel evolutivo depende de la energía disponible y de la influencia de vecinas avanzadas. Los núcleos (nivel III) pueden impulsar la evolución de patrones adyacentes.
+            </p>
+          </section>
+        </aside>
       </div>
-      <p class="hint">Arrastra para sembrar células. Click derecho o Ctrl para limpiar.</p>
     </section>
 
-    <aside class="control-panel">
-      <section class="panel">
-        <h2>Simulación</h2>
-        <div class="row">
-          <button id="playPause" class="btn primary">▶️ Reproducir</button>
-          <button id="step" class="btn">⏩ Paso</button>
-          <button id="clear" class="btn">🧹 Limpiar</button>
-        </div>
-        <div class="row">
-          <button id="randomize" class="btn">✨ Llenar aleatorio</button>
-          <button id="randomEnv" class="btn">🌱 Nuevo entorno</button>
-        </div>
-      </section>
+    <section id="cdPage" class="page cd-page" aria-labelledby="cdTitle">
+      <div class="cd-device">
+        <div class="cd-device-bg" aria-hidden="true"></div>
+        <header class="cd-top">
+          <div class="cd-brand">
+            <span class="cd-brand-text">Elevar</span>
+            <span class="cd-brand-stroke" aria-hidden="true"></span>
+          </div>
+        </header>
+        <article class="cd-card" aria-describedby="cdSummary">
+          <h2 id="cdTitle">Credencial digital</h2>
+          <p id="cdSummary" class="cd-summary">
+            Consulta y genera credenciales en pocos pasos. Completa los datos y obtén la versión digital al instante.
+          </p>
+          <dl class="cd-fields">
+            <div><dt>Nom.:</dt><dd id="cdName">—</dd></div>
+            <div><dt>CUIL:</dt><dd id="cdCuil">—</dd></div>
+            <div><dt>DNI:</dt><dd id="cdDni">—</dd></div>
+            <div><dt>Afiliación:</dt><dd id="cdAffiliation">—</dd></div>
+            <div><dt>Fam.:</dt><dd id="cdFamily">—</dd></div>
+            <div><dt>Emisión:</dt><dd id="cdEmission">—</dd></div>
+            <div><dt>Cat.:</dt><dd id="cdCategory">—</dd></div>
+          </dl>
+        </article>
 
-      <section class="panel">
-        <h2>Ritmo y visión</h2>
-        <label class="ctl">
-          Velocidad
-          <input id="speed" type="range" min="1" max="60" value="12" />
-          <small><span id="fpsLabel">12</span> FPS</small>
-        </label>
-        <label class="ctl">
-          Zoom
-          <input id="zoom" type="range" min="8" max="32" value="18" />
-          <small><span id="zoomLabel">18</span> px</small>
-        </label>
-        <label class="ctl chk">
-          <input id="showGrid" type="checkbox" checked />
-          Mostrar cuadrícula
-        </label>
-        <label class="ctl chk">
-          <input id="showEnvironment" type="checkbox" checked />
-          Mostrar energía ambiental
-        </label>
-      </section>
+        <form id="cdForm" class="cd-form" novalidate>
+          <h3>Gestor de credenciales</h3>
+          <div class="cd-form-grid">
+            <label>
+              Nombre completo
+              <input id="cdInputName" name="name" type="text" autocomplete="name" placeholder="Ej. Laura Fernández" />
+            </label>
+            <label>
+              CUIL
+              <input id="cdInputCuil" name="cuil" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej. 27-12345678-3" required />
+            </label>
+            <label>
+              DNI
+              <input id="cdInputDni" name="dni" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej. 12345678" required />
+            </label>
+            <label>
+              Afiliación
+              <input id="cdInputAffiliation" name="affiliation" type="text" placeholder="Ej. Plan Integral" />
+            </label>
+            <label>
+              Familia
+              <input id="cdInputFamily" name="family" type="text" placeholder="Ej. Titular" />
+            </label>
+            <label>
+              Emisión
+              <input id="cdInputEmission" name="emission" type="date" />
+            </label>
+            <label>
+              Categoría
+              <input id="cdInputCategory" name="category" type="text" placeholder="Ej. A1" />
+            </label>
+          </div>
+          <div class="cd-form-actions">
+            <button type="submit" name="action" value="lookup" class="cd-btn">Consultar</button>
+            <button type="submit" name="action" value="create" class="cd-btn primary">Crear credencial</button>
+          </div>
+          <p class="cd-hint">Consulta con CUIL y DNI. Para crear una nueva credencial completa al menos nombre, CUIL y DNI.</p>
+        </form>
 
-      <section class="panel">
-        <h2>Evolución</h2>
-        <fieldset id="stageSelector" class="stage-selector">
-          <legend>Nivel de célula a pintar</legend>
-          <label><input type="radio" name="stage" value="1" checked /> Brote (I)</label>
-          <label><input type="radio" name="stage" value="2" /> Colonia (II)</label>
-          <label><input type="radio" name="stage" value="3" /> Núcleo (III)</label>
-        </fieldset>
-        <p class="description">
-          Las células siguen la regla B3/S23, pero su nivel evolutivo depende de la energía disponible y de la influencia de vecinas avanzadas. Los núcleos (nivel III) pueden impulsar la evolución de patrones adyacentes.
-        </p>
-      </section>
-    </aside>
+        <p id="cdFeedback" class="cd-feedback" role="status" aria-live="polite"></p>
+
+        <nav class="cd-menu" aria-label="Acciones rápidas">
+          <button type="button" class="cd-menu-btn">
+            <span aria-hidden="true">🔐</span>
+            TOKEN
+          </button>
+          <button type="button" class="cd-menu-btn">
+            <span aria-hidden="true">🔳</span>
+            QR
+          </button>
+          <button type="button" class="cd-menu-btn active">
+            <span aria-hidden="true">🪪</span>
+            CREDENCIAL
+          </button>
+          <button type="button" class="cd-menu-btn">
+            <span aria-hidden="true">🏷️</span>
+            COD. BARRA
+          </button>
+        </nav>
+      </div>
+    </section>
   </main>
 
   <footer class="app-footer">

@@ -1,10 +1,18 @@
 import { Engine } from './engine.js';
 import { Renderer } from './render.js';
 import { $, $$, on, throttle } from './ui.js';
+import { initCredentialPage } from './cd.js';
 
 const canvas = $('#board');
 const renderer = new Renderer(canvas, { cellSize: 18 });
 const engine = new Engine(renderer.cols, renderer.rows);
+
+const viewButtons = $$('.view-switcher .view-btn');
+const pages = {
+  sim: $('#simulationPage'),
+  cd: $('#cdPage'),
+};
+let currentView = 'sim';
 
 const state = {
   playing: false,
@@ -30,6 +38,8 @@ const zoomSlider = $('#zoom');
 const zoomLabel = $('#zoomLabel');
 const showGridChk = $('#showGrid');
 const showEnvChk = $('#showEnvironment');
+
+document.body.classList.add('view-sim');
 
 function updateStats() {
   genEl.textContent = engine.generation.toString();
@@ -63,6 +73,29 @@ function setPlaying(playing) {
   state.lastTick = 0;
   statusText.textContent = playing ? 'Reproduciendo' : 'Pausado';
   playPauseBtn.textContent = playing ? '⏸️ Pausar' : '▶️ Reproducir';
+}
+
+function setView(view, { silent = false } = {}) {
+  if (!(view in pages) || view === currentView) return;
+  currentView = view;
+  Object.entries(pages).forEach(([key, el]) => {
+    if (el) el.classList.toggle('active', key === view);
+  });
+  viewButtons.forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.view === view);
+  });
+  document.body.classList.toggle('view-cd', view === 'cd');
+  document.body.classList.toggle('view-sim', view !== 'cd');
+  if (view === 'cd') {
+    setPlaying(false);
+  } else {
+    renderer.resizeToContainer();
+    engine.resize(renderer.cols, renderer.rows);
+    draw();
+  }
+  if (!silent) {
+    window.dispatchEvent(new CustomEvent('viewchange', { detail: { view } }));
+  }
 }
 
 function stepSimulation() {
@@ -181,6 +214,12 @@ function initControls() {
     engine.resize(renderer.cols, renderer.rows);
     draw();
   });
+
+  viewButtons.forEach((btn) => {
+    on(btn, 'click', () => {
+      setView(btn.dataset.view);
+    });
+  });
 }
 
 function init() {
@@ -191,6 +230,8 @@ function init() {
   zoomLabel.textContent = renderer.cellSize.toString();
   draw();
   requestAnimationFrame(loop);
+  setView('sim', { silent: true });
 }
 
+initCredentialPage();
 init();
