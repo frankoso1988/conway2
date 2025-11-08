@@ -1,102 +1,247 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Juego de la Vida — Módulo 6 (Guardado/Carga + RLE)</title>
-  <link rel="stylesheet" href="css/styles.css" />
-</head>
-<body>
-  <header class="app-header">
-    <h1>Juego de la Vida — Conway</h1>
-    <div class="status">
-      <span id="statusText">Pausado</span>
-      <span id="genLabel">Gen: <b id="gen">0</b></span>
-      <span id="popLabel">Vivas: <b id="pop">0</b></span>
-    </div>
-  </header>
+:root {
+  color-scheme: dark;
+  --bg: #030712;
+  --panel: rgba(15, 23, 42, 0.6);
+  --panel-border: rgba(148, 163, 184, 0.12);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-strong: #0ea5e9;
+  --success: #72f2d6;
+  --warning: #f6c177;
+}
 
-  <main class="app-main">
-    <section class="left">
-      <div class="canvas-wrap" id="canvasWrap" aria-label="Tablero">
-        <canvas id="board" width="960" height="720"></canvas>
-      </div>
+* {
+  box-sizing: border-box;
+}
 
-      <div class="toolbar">
-        <button id="playPause" class="btn">▶️ Reproducir</button>
-        <button id="step" class="btn">⏩ Paso</button>
-        <button id="clear" class="btn">🧹 Limpiar</button>
+html {
+  background-color: var(--bg);
+}
 
-        <label class="ctl">
-          Velocidad
-          <input id="speed" type="range" min="1" max="60" value="12" />
-          <small><span id="fpsLabel">12</span> FPS</small>
-        </label>
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #0b1120, #020617 55%);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
 
-        <label class="ctl">
-          Zoom
-          <input id="zoom" type="range" min="6" max="28" value="16" />
-          <small><span id="zoomLabel">16</span> px</small>
-        </label>
+h1, h2, h3, h4 {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
 
-        <label class="ctl chk">
-          <input id="showGrid" type="checkbox" checked />
-          Cuadrícula
-        </label>
-      </div>
-    </section>
+p {
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
 
-    <section class="right">
-      <h2>Guardado y Carga</h2>
+.app-header {
+  padding: 1.5rem clamp(1rem, 4vw, 3rem);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--panel-border);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(14px);
+  width: min(1200px, 100%);
+  margin: 0 auto;
+}
 
-      <div class="panel">
-        <h3>Autosave</h3>
-        <label class="ctl chk">
-          <input id="autoSaveToggle" type="checkbox" checked />
-          Guardado automático (localStorage)
-        </label>
-        <div class="row">
-          <button id="saveNow" class="btn">💾 Guardar ahora</button>
-          <button id="loadNow" class="btn">📤 Cargar autosave</button>
-          <button id="resetAll" class="btn danger">🗑️ Borrar todo</button>
-        </div>
-        <small id="saveHint">Se guarda el estado y ajustes cada pocos cambios.</small>
-      </div>
+.app-header h1 {
+  font-size: clamp(1.5rem, 2vw, 2.4rem);
+}
 
-      <div class="panel">
-        <h3>Snapshots</h3>
-        <div class="row">
-          <input id="snapshotName" type="text" placeholder="Nombre del snapshot" />
-          <button id="saveSnapshot" class="btn">📸 Guardar snapshot</button>
-        </div>
-        <ul id="snapshotList" class="list"></ul>
-      </div>
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
 
-      <div class="panel">
-        <h3>Exportar / Importar RLE</h3>
-        <div class="row">
-          <button id="exportRLE" class="btn">⬇️ Exportar RLE</button>
-          <label class="btn">
-            ⬆️ Importar RLE (archivo)
-            <input id="fileInput" type="file" accept=".rle,.lif,.txt" hidden />
-          </label>
-        </div>
-        <textarea id="rleText" rows="6" placeholder="Pega aquí RLE para importar..."></textarea>
-        <div class="row">
-          <button id="importRLEText" class="btn">⬆️ Importar desde texto</button>
-          <button id="clearRLEText" class="btn ghost">Limpiar</button>
-        </div>
-        <div id="dropZone" class="dropzone" aria-label="Arrastra aquí archivos RLE">
-          Arrastra y suelta un archivo .rle / .lif / .txt aquí
-        </div>
-      </div>
-    </section>
-  </main>
+.status strong {
+  color: var(--text);
+}
 
-  <footer class="app-footer">
-    <small>Módulo 6 — localStorage + RLE • Regla B3/S23 • Arrastra con el mouse para dibujar/borrar.</small>
-  </footer>
+.app-main {
+  display: flex;
+  flex: 1;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: flex-start;
+  width: min(1200px, 100%);
+  margin: 0 auto;
+}
 
-  <script type="module" src="js/main.js"></script>
-</body>
-</html>
+.canvas-panel {
+  flex: 1 1 60%;
+  min-width: 0;
+}
+
+.canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 25px 45px rgba(15, 23, 42, 0.55);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hint {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.control-panel {
+  flex: 0 0 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panel {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.12);
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  padding: 0.55rem 1.15rem;
+  background: rgba(15, 23, 42, 0.65);
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  border-color: rgba(14, 165, 233, 0.35);
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(148, 163, 184, 0.45);
+  box-shadow: 0 8px 18px rgba(14, 165, 233, 0.25);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.ctl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.ctl input[type="range"] {
+  width: 100%;
+}
+
+.ctl small {
+  color: var(--muted);
+}
+
+.ctl.chk {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.stage-selector {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 0.85rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stage-selector legend {
+  font-size: 0.95rem;
+  color: var(--muted);
+  padding: 0 0.35rem;
+}
+
+.stage-selector label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.description {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-bottom: 0;
+}
+
+.app-footer {
+  padding: 1.25rem clamp(1rem, 4vw, 3rem);
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--panel-border);
+  background: rgba(15, 23, 42, 0.75);
+  width: min(1200px, 100%);
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .app-main {
+    flex-direction: column;
+  }
+
+  .canvas-panel,
+  .control-panel {
+    width: 100%;
+  }
+
+  .control-panel {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
