@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Juego de la Vida — Módulo 6 (Guardado/Carga + RLE)</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Juego de la Vida — Conway</h1>
+    <div class="status">
+      <span id="statusText">Pausado</span>
+      <span id="genLabel">Gen: <b id="gen">0</b></span>
+      <span id="popLabel">Vivas: <b id="pop">0</b></span>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section class="left">
+      <div class="canvas-wrap" id="canvasWrap" aria-label="Tablero">
+        <canvas id="board" width="960" height="720"></canvas>
+      </div>
+
+      <div class="toolbar">
+        <button id="playPause" class="btn">▶️ Reproducir</button>
+        <button id="step" class="btn">⏩ Paso</button>
+        <button id="clear" class="btn">🧹 Limpiar</button>
+
+        <label class="ctl">
+          Velocidad
+          <input id="speed" type="range" min="1" max="60" value="12" />
+          <small><span id="fpsLabel">12</span> FPS</small>
+        </label>
+
+        <label class="ctl">
+          Zoom
+          <input id="zoom" type="range" min="6" max="28" value="16" />
+          <small><span id="zoomLabel">16</span> px</small>
+        </label>
+
+        <label class="ctl chk">
+          <input id="showGrid" type="checkbox" checked />
+          Cuadrícula
+        </label>
+      </div>
+    </section>
+
+    <section class="right">
+      <h2>Guardado y Carga</h2>
+
+      <div class="panel">
+        <h3>Autosave</h3>
+        <label class="ctl chk">
+          <input id="autoSaveToggle" type="checkbox" checked />
+          Guardado automático (localStorage)
+        </label>
+        <div class="row">
+          <button id="saveNow" class="btn">💾 Guardar ahora</button>
+          <button id="loadNow" class="btn">📤 Cargar autosave</button>
+          <button id="resetAll" class="btn danger">🗑️ Borrar todo</button>
+        </div>
+        <small id="saveHint">Se guarda el estado y ajustes cada pocos cambios.</small>
+      </div>
+
+      <div class="panel">
+        <h3>Snapshots</h3>
+        <div class="row">
+          <input id="snapshotName" type="text" placeholder="Nombre del snapshot" />
+          <button id="saveSnapshot" class="btn">📸 Guardar snapshot</button>
+        </div>
+        <ul id="snapshotList" class="list"></ul>
+      </div>
+
+      <div class="panel">
+        <h3>Exportar / Importar RLE</h3>
+        <div class="row">
+          <button id="exportRLE" class="btn">⬇️ Exportar RLE</button>
+          <label class="btn">
+            ⬆️ Importar RLE (archivo)
+            <input id="fileInput" type="file" accept=".rle,.lif,.txt" hidden />
+          </label>
+        </div>
+        <textarea id="rleText" rows="6" placeholder="Pega aquí RLE para importar..."></textarea>
+        <div class="row">
+          <button id="importRLEText" class="btn">⬆️ Importar desde texto</button>
+          <button id="clearRLEText" class="btn ghost">Limpiar</button>
+        </div>
+        <div id="dropZone" class="dropzone" aria-label="Arrastra aquí archivos RLE">
+          Arrastra y suelta un archivo .rle / .lif / .txt aquí
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Módulo 6 — localStorage + RLE • Regla B3/S23 • Arrastra con el mouse para dibujar/borrar.</small>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
